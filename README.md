@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./assets/header.png" alt="TesterArmy CLI" width="80%" />
+  <img src="https://github.com/user-attachments/assets/2eeb068a-36c4-43fb-838c-7e57b087cac3" alt="TesterArmy CLI" width="80%" />
 </p>
 
 <p align="center">
