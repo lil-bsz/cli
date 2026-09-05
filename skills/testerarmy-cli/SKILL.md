@@ -1,6 +1,6 @@
 ---
 name: testerarmy-cli
-description: Use TesterArmy CLI to create, organize, and run dashboard-managed QA tests. Prefer saved tests, groups, project context, credentials, and remote runs over one-off local prompts. Trigger when defining regression coverage or adding QA flows.
+description: Use TesterArmy CLI to create, organize, and run dashboard-managed QA tests in TesterArmy cloud. Trigger when defining regression coverage, validating a flow, or inspecting remote test results.
 license: MIT
 metadata:
   author: TesterArmy
@@ -12,10 +12,9 @@ metadata:
 Create dashboard-managed QA coverage with `ta` / `testerarmy`.
 
 The CLI is a control plane for the TesterArmy dashboard: manage projects,
-environments, credentials, and saved tests, and queue remote runs that execute
-in TesterArmy cloud. `ta tests run` queues remote dashboard runs by default.
-Use local execution (`ta run "..."` or `ta tests run --local`) only for quick
-exploration.
+environments, credentials, and saved tests, and queue runs that execute in
+TesterArmy cloud. Use a cloud-reachable preview or tunnel environment to
+validate development changes.
 
 ## When to Use
 
@@ -233,12 +232,8 @@ Common groups: `Smoke`, `Auth`, `Core journeys`, `Mobile smoke`.
 
 ## Runs
 
-Modes:
-
-- Default/remote: queues the saved test in TesterArmy cloud; results show up in the dashboard.
-- `--local`: fetches the saved test, then runs it on this machine.
-
-Remote validation (default):
+`ta tests run` queues the saved test in TesterArmy cloud. Add `--wait` for
+validation; without it, exit code 0 only confirms that the run was queued.
 
 ```bash
 ta tests run <testId> --wait --json
@@ -248,24 +243,28 @@ ta tests run <testId> --platform ios --app-id <appId> --wait --json
 ta tests run <testId> --platform android --app-id <appId> --wait --json
 ```
 
-Local debugging:
+Development targets must be reachable from the cloud browser. Save a preview
+or tunnel URL as an environment, then select it on the run:
 
 ```bash
-ta tests run <testId> --local --url http://localhost:3000 --json
-ta tests run --group <groupId> --project <projectId> --local --url http://localhost:3000 --parallel 3 --json
+ta projects environments-create <projectId> --name Development --url https://dev.example.com --json
+ta tests run <testId> --env development --wait --json
 ```
 
-Defaults:
+Run options:
 
-- No flag: remote cloud execution (dashboard run).
-- `--local`: local browser execution on this machine.
-- `--wait`: wait for remote results.
-- `--env <nameOrSlug>`: target a saved project environment (remote runs pass its ID; local runs use its URL).
-- Local-only flags such as `--headed`, `--browser`, `--timeout`, and `--system-prompt-file` are ignored for remote runs.
-- Local runs can use `--headed`, `--browser chrome|firefox|safari`, `--timeout`, `--output`, `--debug`, and `--system-prompt-file`.
-- Remote runs can use `--wait-timeout`, `--wait-interval`, `--output`, `--platform web|ios|android`, `--app-id`, and `--project-environment-id`.
-- Remote group runs can use `--environment production|staging|preview`.
-- Remote single-test runs can use `--mode fast|deep`.
+- `--env <nameOrSlug>` or `--project-environment-id <id>`: select a saved project environment; do not combine them.
+- `--url <url>`: target URL override for group runs; do not combine it with `--env`.
+- `--wait-timeout <ms>` and `--wait-interval <ms>`: control how long to wait and the initial polling interval.
+- `--platform web|ios|android`, `--app-id`, and `--device-model`: select the runtime and mobile build/device.
+- Group runs can use `--environment production|staging|preview` to label the run origin.
+- Single-test runs can use `--mode fast|deep`.
+
+Save a local result artifact with shell redirection:
+
+```bash
+ta tests run <testId> --env development --wait --json > result.json
+```
 
 Runs:
 
@@ -273,6 +272,8 @@ Runs:
 ta runs list --project <projectId> --json
 ta runs get <runId> --json
 ta runs wait <runId> --timeout 600000 --json
+ta runs messages <runId> --json
+ta runs telemetry <runId> --json
 ta runs cancel <runId> --json
 ```
 
@@ -289,21 +290,6 @@ ta tests run <testId> --platform android --app-id <appId> --wait --json
 
 Supported uploads: `.app`, `.app.zip`, `.zip` for iOS Simulator apps and `.apk`
 for Android. Use `--remove-after <seconds>` to auto-delete uploaded apps.
-
-## Local Prompt
-
-`ta run <prompt>` runs an ad hoc local browser test:
-
-```bash
-ta run "check pricing CTA" --url https://example.com --json
-```
-
-Useful flags: `--headed`, `--browser chrome|firefox|safari`, `--timeout`,
-`--output`, `--debug`, and `--system-prompt-file`.
-
-Use only to explore before creating or updating dashboard tests. Use
-`ta tests create` and `ta tests run --group` for durable workflows that run
-remotely on the dashboard.
 
 ## Reporting
 
