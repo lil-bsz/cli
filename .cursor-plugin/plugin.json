@@ -1,0 +1,24 @@
+{
+  "name": "testerarmy",
+  "displayName": "TesterArmy",
+  "version": "1.0.0",
+  "description": "TesterArmy runs agents that click through your web and mobile app the way a real user would, on every pull request. Create tests in plain language, start runs, and read what broke without leaving your editor.",
+  "author": {
+    "name": "TesterArmy",
+    "email": "support@tester.army",
+    "url": "https://tester.army"
+  },
+  "homepage": "https://docs.tester.army/cli/mcp",
+  "repository": "https://github.com/tester-army/cli",
+  "license": "MIT",
+  "keywords": [
+    "testing",
+    "qa",
+    "end-to-end",
+    "mcp",
+    "agents",
+    "playwright",
+    "mobile"
+  ],
+  "logo": "assets/logo.png"
+}

@@ -1,0 +1,46 @@
+{
+  "name": "testerarmy",
+  "version": "1.0.0",
+  "description": "TesterArmy runs agents that click through your web and mobile app the way a real user would, on every pull request. Create tests in plain language, start runs, and read what broke without leaving your editor.",
+  "author": {
+    "name": "TesterArmy",
+    "email": "support@tester.army",
+    "url": "https://tester.army"
+  },
+  "homepage": "https://docs.tester.army/cli/mcp",
+  "repository": "https://github.com/tester-army/cli",
+  "license": "MIT",
+  "keywords": [
+    "testing",
+    "qa",
+    "end-to-end",
+    "mcp",
+    "agents",
+    "playwright",
+    "mobile"
+  ],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "TesterArmy",
+    "shortDescription": "Agents that test like users",
+    "longDescription": "TesterArmy (YC 26) tests your product the way a person would. It opens the app, follows plain-language flows, and reports what passed, what failed and what was blocked, with a recording and a full transcript of every step. There are no test scripts to write or maintain. Through this connector your agent can list and create projects, environments and credentials, write and update tests in plain language, group them, start runs or a discovery pass, and then debug a failure by reading the run verdict, the transcript of what the agent did, and the browser console and network evidence. A built-in guide tool teaches your agent how to size and organise tests and how to debug runs. Signing in uses your TesterArmy account through OAuth, so there is no API key to create or rotate. The free tier is enough to connect and run your first tests.",
+    "developerName": "TesterArmy",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Test this pull request like a real user with TesterArmy",
+      "Write a TesterArmy test in plain language for the signup flow",
+      "Show me why the latest TesterArmy run failed and what to fix"
+    ],
+    "websiteURL": "https://tester.army",
+    "privacyPolicyURL": "https://tester.army/privacy",
+    "termsOfServiceURL": "https://tester.army/terms",
+    "brandColor": "#FF8001",
+    "logo": "./assets/logo.png",
+    "composerIcon": "./assets/logo.png"
+  }
+}

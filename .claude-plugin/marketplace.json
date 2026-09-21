@@ -6,13 +6,35 @@
     "url": "https://tester.army"
   },
   "metadata": {
-    "description": "Agent skills for TesterArmy CLI workflows",
+    "description": "TesterArmy plugin: the hosted TesterArmy MCP server plus agent skills for the TesterArmy CLI",
     "version": "1.0.0"
+  },
+  "renames": {
+    "testerarmy-cli": "testerarmy"
   },
   "plugins": [
     {
-      "name": "testerarmy-cli",
-      "description": "Use TesterArmy CLI to validate app behavior after changes with targeted markdown tests, debug artifacts, and pass/fail reporting.",
+      "name": "testerarmy",
+      "description": "TesterArmy runs agents that click through your web and mobile app the way a real user would, on every pull request. Create tests in plain language, start runs, and read what broke without leaving your editor.",
+      "version": "1.0.0",
+      "author": {
+        "name": "TesterArmy",
+        "email": "support@tester.army",
+        "url": "https://tester.army"
+      },
+      "homepage": "https://docs.tester.army/cli/mcp",
+      "repository": "https://github.com/tester-army/cli",
+      "license": "MIT",
+      "keywords": [
+        "testing",
+        "qa",
+        "end-to-end",
+        "mcp",
+        "agents",
+        "playwright",
+        "mobile"
+      ],
+      "category": "testing",
       "source": "./",
       "skills": [
         "./skills/testerarmy-cli"

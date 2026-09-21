@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "testerarmy": {
+      "type": "http",
+      "url": "https://tester.army/mcp"
+    }
+  }
+}

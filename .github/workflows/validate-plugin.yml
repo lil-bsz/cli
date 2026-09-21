@@ -1,0 +1,35 @@
+name: Validate plugin manifests
+
+on:
+  pull_request:
+    paths:
+      - "plugin.json"
+      - "mcp.json"
+      - ".mcp.json"
+      - ".claude-plugin/**"
+      - ".codex-plugin/**"
+      - ".cursor-plugin/**"
+      - "assets/**"
+      - "scripts/check-plugin-manifests.sh"
+      - ".github/workflows/validate-plugin.yml"
+  push:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Manifests parse and agree with each other
+        run: scripts/check-plugin-manifests.sh
+      - name: Root manifest and mcp.json match the Agent Plugins schemas
+        run: |
+          curl -fsSL https://agent-plugins.org/schemas/1.0.0/plugin.schema.json -o /tmp/plugin.schema.json
+          curl -fsSL https://agent-plugins.org/schemas/1.0.0/mcp.schema.json -o /tmp/mcp.schema.json
+          npx -y ajv-cli@5 validate --spec=draft2020 -s /tmp/plugin.schema.json -d plugin.json
+          npx -y ajv-cli@5 validate --spec=draft2020 -s /tmp/mcp.schema.json -d mcp.json
+      - name: Claude Code plugin manifests
+        run: |
+          npm i -g @anthropic-ai/claude-code
+          claude plugin validate . --strict
+          claude plugin validate .claude-plugin/plugin.json --strict

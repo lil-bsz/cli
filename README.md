@@ -8,6 +8,7 @@
   <a href="https://tester.army"><strong>Platform</strong></a> |
   <a href="https://tester.army/dashboard/profile/api-keys"><strong>API Keys</strong></a> |
   <a href="#skill-installation"><strong>Skills</strong></a> |
+  <a href="#mcp-server-and-plugins"><strong>MCP</strong></a> |
   <a href="#examples"><strong>Examples</strong></a>
 </p>
 
@@ -17,7 +18,7 @@
   <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT license" /></a>
 </p>
 
-## AI QA agent that clicks through your website like a real human.
+## Agents that test your app like real users.
 
 TesterArmy CLI (`testerarmy` / `ta`) is an agent-first QA runner.
 
@@ -74,6 +75,45 @@ Use skills CLI install:
 ```bash
 npx skills add tester-army/cli
 ```
+
+## MCP server and plugins
+
+TesterArmy also runs as a hosted MCP server at `https://tester.army/mcp` (Streamable HTTP). It signs you in with your TesterArmy account through OAuth, so there is no API key to create or paste.
+
+Claude Code:
+
+```bash
+claude mcp add --transport http testerarmy https://tester.army/mcp
+```
+
+Codex:
+
+```bash
+codex mcp add testerarmy --url https://tester.army/mcp
+```
+
+Or add it to `~/.codex/config.toml` and run `codex mcp login testerarmy`:
+
+```toml
+[mcp_servers.testerarmy]
+url = "https://tester.army/mcp"
+```
+
+Cursor: open Customize and search for `testerarmy`, or click Add to Cursor on the marketplace listing. If the plugin is not listed yet, add the server by hand to `~/.cursor/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "testerarmy": {
+      "url": "https://tester.army/mcp"
+    }
+  }
+}
+```
+
+This repo is also a Claude Code plugin that installs the MCP server and the `testerarmy-cli` skill together: run `/plugin marketplace add tester-army/cli`, then `/plugin install testerarmy@testerarmy-agent-skills`.
+
+Full reference for the server and its tools: https://docs.tester.army/cli/mcp
 
 ## Examples
 
