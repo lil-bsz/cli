@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# Keeps the four plugin manifests in step. Run locally or in CI.
+# Keeps the plugin manifests and the MCP Registry manifest (server.json) in step. Run locally or in CI.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-files=(.claude-plugin/plugin.json .claude-plugin/marketplace.json .codex-plugin/plugin.json .cursor-plugin/plugin.json plugin.json .mcp.json mcp.json)
+files=(.claude-plugin/plugin.json .claude-plugin/marketplace.json .codex-plugin/plugin.json .cursor-plugin/plugin.json plugin.json .mcp.json mcp.json server.json)
 for f in "${files[@]}"; do jq -e . "$f" >/dev/null || { echo "invalid JSON: $f"; exit 1; }; done
 
 # name, version and description must match across every manifest and the marketplace entry
@@ -26,6 +26,11 @@ u2=$(jq -r '.mcpServers.testerarmy.url' mcp.json)
 [ "$u1" = "$u2" ] || { echo "MCP url differs: .mcp.json=$u1 mcp.json=$u2"; exit 1; }
 [ "$(jq -r '.mcpServers.testerarmy.type' .mcp.json)" = "http" ] || { echo ".mcp.json must use type http (Claude Code)"; exit 1; }
 [ "$(jq -r '.mcpServers.testerarmy.type' mcp.json)" = "streamable-http" ] || { echo "mcp.json must use type streamable-http (Agent Plugins)"; exit 1; }
+
+# the registry manifest is published from main by .github/workflows/publish-mcp-registry.yml:
+# same version as the plugins, same server URL as the MCP files
+[ "$(jq -r .version server.json)" = "$(jq -r .version plugin.json)" ] || { echo "version differs in server.json (bump it with the plugin manifests)"; exit 1; }
+[ "$(jq -r '.remotes[0].url' server.json)" = "$u1" ] || { echo "server.json remotes[0].url differs from the MCP files"; exit 1; }
 
 # referenced logo must exist
 for p in "$(jq -r .logo .cursor-plugin/plugin.json)" "$(jq -r .interface.logo .codex-plugin/plugin.json)"; do

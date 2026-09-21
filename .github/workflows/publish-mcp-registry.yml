@@ -1,0 +1,99 @@
+name: Publish to MCP Registry
+
+# Publishes server.json to the Official MCP Registry (registry.modelcontextprotocol.io) as
+# io.github.tester-army/testerarmy, which feeds Glama, PulseMCP and the other aggregators.
+#
+# Authentication is GitHub Actions OIDC: the registry grants the io.github.<repository owner>/*
+# namespace to workflows running in this organisation's repositories. A personal
+# `mcp-publisher login github` only gets that namespace for org Owners (plain members are refused),
+# so this workflow is the route that needs nobody's personal login and no stored secret.
+#
+# Runs when server.json (or this file) lands on main, and on demand from the Actions tab. Manual
+# runs are limited to main because the registry authorises on the repository owner alone and never
+# looks at the branch: without the guard, any writer could publish an unreviewed branch under the
+# org name. The `mcp-registry-publish` environment exists so an org Owner can add a deployment
+# branch rule and a required reviewer in Settings > Environments without touching this file; until
+# then the `if:` below is the gate.
+#
+# The registry refuses a version it already has, so the job first checks whether server.json's
+# version is published and skips cleanly if so. To publish again, bump "version" in server.json
+# together with the plugin manifests; scripts/check-plugin-manifests.sh fails if they differ.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "server.json"
+      - ".github/workflows/publish-mcp-registry.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: mcp-registry-publish
+    # One publish at a time; a parallel run for the same version would only fail.
+    concurrency: publish-mcp-registry
+    permissions:
+      id-token: write # OIDC token exchanged with the registry
+      contents: read
+    env:
+      # If "login github-oidc" fails with "invalid audience", the registry moved ahead of this
+      # binary: bump to the latest release at https://github.com/modelcontextprotocol/registry/releases
+      MCP_PUBLISHER_VERSION: "1.8.1"
+      REGISTRY_URL: https://registry.modelcontextprotocol.io
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install mcp-publisher (download checksum verified)
+        run: |
+          base="https://github.com/modelcontextprotocol/registry/releases/download/v${MCP_PUBLISHER_VERSION}"
+          curl -fsSL --retry 3 "$base/mcp-publisher_linux_amd64.tar.gz" -o mcp-publisher_linux_amd64.tar.gz
+          curl -fsSL --retry 3 "$base/registry_${MCP_PUBLISHER_VERSION}_checksums.txt" -o checksums.txt
+          sha256sum --check --ignore-missing checksums.txt
+          tar xzf mcp-publisher_linux_amd64.tar.gz mcp-publisher
+          ./mcp-publisher --version
+
+      # The registry's own validator: schema plus the semantic rules the publish endpoint applies.
+      - name: Validate server.json against the registry
+        run: ./mcp-publisher validate server.json
+
+      - name: Skip if this version is already published
+        id: check
+        run: |
+          name=$(jq -r .name server.json)
+          version=$(jq -r .version server.json)
+          encoded=$(jq -rn --arg n "$name" '$n | @uri')
+          if curl -fsS -o /dev/null "$REGISTRY_URL/v0/servers/$encoded/versions/$version"; then
+            echo "::notice::$name@$version is already in the registry; bump version in server.json to publish again"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Log in with GitHub Actions OIDC
+        if: steps.check.outputs.skip != 'true'
+        run: ./mcp-publisher login github-oidc
+
+      - name: Publish
+        if: steps.check.outputs.skip != 'true'
+        run: ./mcp-publisher publish server.json
+
+      # Exact lookup: 404 (and a failed step) if the version is not there.
+      - name: Confirm the registry entry
+        run: |
+          set -euo pipefail
+          name=$(jq -r .name server.json)
+          version=$(jq -r .version server.json)
+          encoded=$(jq -rn --arg n "$name" '$n | @uri')
+          entry=$(curl -fsS --retry 3 "$REGISTRY_URL/v0/servers/$encoded/versions/$version" \
+            | jq '{name: .server.name, version: .server.version, status: ._meta["io.modelcontextprotocol.registry/official"].status, isLatest: ._meta["io.modelcontextprotocol.registry/official"].isLatest, publishedAt: ._meta["io.modelcontextprotocol.registry/official"].publishedAt}')
+          echo "$entry"
+          {
+            echo "### MCP Registry: $name@$version"
+            echo '```json'
+            echo "$entry"
+            echo '```'
+            echo "Glama connector page (claim it once it appears): https://glama.ai/mcp/connectors/$name"
+          } >> "$GITHUB_STEP_SUMMARY"

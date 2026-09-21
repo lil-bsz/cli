@@ -10,6 +10,7 @@ on:
       - ".codex-plugin/**"
       - ".cursor-plugin/**"
       - "assets/**"
+      - "server.json"
       - "scripts/check-plugin-manifests.sh"
       - ".github/workflows/validate-plugin.yml"
   push:
@@ -19,7 +20,7 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Manifests parse and agree with each other
         run: scripts/check-plugin-manifests.sh
       - name: Root manifest and mcp.json match the Agent Plugins schemas
