@@ -12,7 +12,7 @@ body:
     attributes:
       label: Exact command
       description: Include full `ta ...` command.
-      placeholder: ta run tests/01-landing-page.md --debug
+      placeholder: ta tests run <testId> --env staging --wait --json
     validations:
       required: true
   - type: input
@@ -42,9 +42,9 @@ body:
   - type: input
     id: artifacts
     attributes:
-      label: Artifact path
-      description: Path under `.testerarmy/<timestamp>/`
-      placeholder: .testerarmy/2026-03-09T12-10-10-123Z/
+      label: Run ID or saved JSON path
+      description: Include the cloud run ID, or the saved CLI response if no run was created.
+      placeholder: <runId> or result.json
     validations:
       required: true
   - type: textarea

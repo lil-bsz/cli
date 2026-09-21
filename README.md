@@ -20,11 +20,12 @@
 
 ## Agents that test your app like real users.
 
-TesterArmy CLI (`testerarmy` / `ta`) is an agent-first QA runner.
+TesterArmy CLI (`testerarmy` / `ta`) manages QA coverage in the TesterArmy dashboard
+and queues runs that execute in TesterArmy cloud.
 
-- Run browser checks from plain prompts.
-- Run reusable markdown scenarios (`tests/*.md`).
-- Get deterministic pass/fail output plus local artifacts.
+- Create and organize saved tests with plain-language steps.
+- Run browser and mobile checks against saved environments.
+- Wait for results and inspect run transcripts through JSON output.
 - Feed concrete validation back to coding agents.
 
 Start here:
@@ -62,11 +63,18 @@ Or run without install:
 npx testerarmy --help
 ```
 
-Run a test scenario:
+Find a project and its saved tests, then wait for a cloud run:
 
 ```bash
-ta run examples/tests/01-landing-page.md --url "http://localhost:3000"
+ta projects list --json
+ta tests list --project <projectId> --json
+ta tests run <testId> --wait --json
 ```
+
+Use IDs returned by the list commands. Without `--wait`, a successful command
+only confirms that the run was queued. To validate development changes, save a
+cloud-reachable preview or tunnel URL as a project environment and select it
+with `--env <nameOrSlug>`.
 
 ## Skill Installation
 
@@ -117,7 +125,8 @@ Full reference for the server and its tools: https://docs.tester.army/cli/mcp
 
 ## Examples
 
-Use starter examples in `examples/`.
+Use the markdown scenarios in [`examples/`](examples/README.md) as authoring
+references when creating saved dashboard tests with `ta tests create`.
 
 - `examples/TESTER.md`
 - `examples/tests/01-landing-page.md`
@@ -125,10 +134,11 @@ Use starter examples in `examples/`.
 - `examples/tests/03-project-create.md`
 - `examples/prompts/ad-hoc-regression.md`
 
-Run a full smoke batch:
+Run a saved smoke group:
 
 ```bash
-ta run examples/tests/ --url "http://localhost:3000" --parallel 3
+ta groups list --project <projectId> --json
+ta tests run --group <groupId> --project <projectId> --wait --json
 ```
 
 ## Contributing

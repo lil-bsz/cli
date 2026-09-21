@@ -7,7 +7,7 @@ body:
     id: command
     attributes:
       label: Exact command
-      placeholder: ta run tests/03-project-create.md --json
+      placeholder: ta tests run <testId> --env staging --wait --json
     validations:
       required: true
   - type: input
@@ -27,8 +27,9 @@ body:
   - type: input
     id: artifacts
     attributes:
-      label: Failing artifact path
-      placeholder: .testerarmy/2026-03-09T12-10-10-123Z/
+      label: Failing run ID or saved JSON path
+      description: Include the cloud run ID, or the saved CLI response if no run was created.
+      placeholder: <runId> or result.json
     validations:
       required: true
   - type: textarea
